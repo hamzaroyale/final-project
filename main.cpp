@@ -22,13 +22,14 @@ void dispMap(char[][SIZE],int,char[][SIZE],int);              //displays maps
 void start(char[][SIZE],int,char[][SIZE],int,char[][SIZE],int);//initializes maps 
 void place(char[][SIZE],int);          //asks user to place the battleships on map
 int convert(char);                  //converts 'char' -> 'int' for use in arrays
-void mAttack(char[][SIZE],int,char[][SIZE],int);  //Users turn 
+bool mAttack(char[][SIZE],int,char[][SIZE],int);  //Users turn 
 void cAttack(char[][SIZE],int);                //computers turn
 void check(char[][SIZE],int);                  //checks if all targets are hit
 void disply(char[][SIZE],int);
-//------------------------------------------------------------------------------
-//------Execution Begins Here---------------------------------------------------
-//------------------------------------------------------------------------------
+void clrscr();
+//---------------------------------------------------------------<<<<<<<<<<<<<<<
+//------Execution Begins Here------------------------------------<<<<<<<<<<<<<<<
+//---------------------------------------------------------------<<<<<<<<<<<<<<<
 int main(int argc, char** argv) {
     srand(static_cast<unsigned int>(time(0)));
     
@@ -36,7 +37,7 @@ int main(int argc, char** argv) {
     char map2[SIZE][SIZE];            //2d array that will store computers actual data
     char map3[SIZE][SIZE];            //2d array that will show computer's data
     char continu='x';
- 
+    bool turns;
     
     cout<<"\n         BATTLESHIP GAME\n"<<"       PLACE YOUR BATTLESHIPS:\n";
     
@@ -46,8 +47,13 @@ int main(int argc, char** argv) {
     dispMap(map1,SIZE,map2,SIZE);         //display both maps
     disply(map3,SIZE);
     do{
-        mAttack(map2,SIZE,map3,SIZE);     //start from user attack  
-        dispMap(map1,SIZE,map2,SIZE);     //display both maps
+        do{
+            turns=mAttack(map2,SIZE,map3,SIZE);     //start from user attack
+            dispMap(map1,SIZE,map2,SIZE);     //display both maps
+        }
+        while(turns==true);
+           
+        //dispMap(map1,SIZE,map2,SIZE);     //display both maps
         cAttack(map1,SIZE);    //generate random attack from computer & show result
         dispMap(map1,SIZE,map2,SIZE);     //display both maps
         check(map1,SIZE);              //checks if all targets are hit
@@ -138,8 +144,8 @@ void dispMap(char a[][SIZE],int rowSizea, char b[][SIZE],int rowsizeb){
 //PURPOSE: ASKS THE USER FOR ATTACK LOCATION
 //******************************************************************************
 
-void mAttack(char mapA[][SIZE],int,char mapB[][SIZE],int){
-    int x; char y;
+bool mAttack(char mapA[][SIZE],int,char mapB[][SIZE],int){
+    int x; char y; bool check;
     cout<<"\n\n========================================================\n";
     cout<<"====================YOUR TURN===========================\n";
     cout<<"========================================================\n";
@@ -148,10 +154,13 @@ void mAttack(char mapA[][SIZE],int,char mapB[][SIZE],int){
     if(mapB[x][convert(y)]=='='){
         cout<<"\n--------------TARGET HIT--------------------------\n";
         mapA[x][convert(y)]='X';
+        check=true;
     }else{
         cout<<"\n--------------TARGET MISSED-----------------------\n";
-        mapA[x][convert(y)]='o';        
+        mapA[x][convert(y)]='o';
+        check=false;
     }
+    return check;
 }
 //******************************************************************************
 //*********************** start ************************************************
@@ -219,7 +228,8 @@ void start(char map_1[][SIZE],int,char map_2[][SIZE],int,char map_3[][SIZE],int)
 void place(char map1[][SIZE],int){
     int x=0; char y='z';
     //-----------------1st ship------------------------------------------------- 
-    dispMap(map1,SIZE,map1,SIZE);
+    //dispMap(map1,SIZE,map1,SIZE);
+    disply(map1,SIZE);
     cout<<"\nWhere do you want to place a horizontal battleship(4 units long)? \n";
     do{
         cout<<"Enter the digit value between[1-8]: ";
@@ -235,7 +245,8 @@ void place(char map1[][SIZE],int){
     map1[x][convert(y)+3]='=';
     
     //-----------------2nd ship------------------------------------------------- 
-    dispMap(map1,SIZE,map1,SIZE);
+    clrscr();
+    disply(map1,SIZE);
     x=0; y='z';
     cout<<"\nwhere do you want to place a horizontal battleship(4 units long)? \n";
     do{
@@ -251,7 +262,8 @@ void place(char map1[][SIZE],int){
     map1[x][convert(y)+2]='=';
     map1[x][convert(y)+3]='=';
     //-----------------3rd ship------------------------------------------------- 
-    dispMap(map1,SIZE,map1,SIZE);
+    clrscr();
+    disply(map1,SIZE);
     x=0; y='z';
     cout<<"\nwhere do you want to place a verticle battleship(3 units long)? \n";
     do{
@@ -266,7 +278,8 @@ void place(char map1[][SIZE],int){
     map1[x+1][convert(y)]='=';
     map1[x+2][convert(y)]='=';
     //-----------------4th ship------------------------------------------------- 
-    dispMap(map1,SIZE,map1,SIZE);
+    clrscr();
+    disply(map1,SIZE);
     x=0; y='z';
     cout<<"\nwhere do you want to place a verticle battleship(3 units long)? \n";
     do{
@@ -281,7 +294,8 @@ void place(char map1[][SIZE],int){
     map1[x+1][convert(y)]='=';
     map1[x+2][convert(y)]='=';
     //-----------------5th ship------------------------------------------------- 
-    dispMap(map1,SIZE,map1,SIZE);
+    clrscr();
+    disply(map1,SIZE);
     x=0; y='z';
     cout<<"\nwhere do you want to place a verticle battleship(2 units long)? \n";
     do{
@@ -338,3 +352,12 @@ int convert(char c){
     return ret;
 }
 
+//******************************************************************************
+//*********************** clrscr **********************************************
+//******************************************************************************
+//PURPOSE: clears out the display
+//******************************************************************************
+
+void clrscr(){
+    cout<<"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+}
