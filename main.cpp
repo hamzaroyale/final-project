@@ -25,7 +25,7 @@ int convert(char);                  //converts 'char' -> 'int' for use in arrays
 void mAttack(char[][SIZE],int,char[][SIZE],int);  //Users turn 
 void cAttack(char[][SIZE],int);                //computers turn
 void check(char[][SIZE],int);                  //checks if all targets are hit
-
+void disply(char[][SIZE],int);
 //------------------------------------------------------------------------------
 //------Execution Begins Here---------------------------------------------------
 //------------------------------------------------------------------------------
@@ -41,9 +41,10 @@ int main(int argc, char** argv) {
     cout<<"\n         BATTLESHIP GAME\n"<<"       PLACE YOUR BATTLESHIPS:\n";
     
     start(map1,SIZE,map2,SIZE,map3,SIZE);    //initialize and place ships
+    disply(map3,SIZE);
     place(map1,SIZE);                  //ask user to place ships on map
     dispMap(map1,SIZE,map2,SIZE);         //display both maps
-    
+    disply(map3,SIZE);
     do{
         mAttack(map2,SIZE,map3,SIZE);     //start from user attack  
         dispMap(map1,SIZE,map2,SIZE);     //display both maps
@@ -56,7 +57,25 @@ int main(int argc, char** argv) {
     
     return 0;
 }
+//******************************************************************************
+//*********************** disply **********************************************
+//******************************************************************************
+//PURPOSE: display map
+//******************************************************************************
 
+void disply(char a[][SIZE],int){
+    cout<<"\n    a b c d e f g h\n";
+    cout<<"   -----------------\n";
+    for(int i=1;i<=8;i++){
+        cout<<i<<" | ";
+        for(int j=1;j<=8;j++){
+            cout<<a[i][j]<<" ";
+        }
+        cout<<"|";
+        cout<<endl;
+    }
+    cout<<"   -----------------\n";
+}
 
 //******************************************************************************
 //*********************** cAttcak **********************************************
@@ -148,11 +167,48 @@ void start(char map_1[][SIZE],int,char map_2[][SIZE],int,char map_3[][SIZE],int)
             map_3[i][j]='.';
         }
     }
-    map_3[1][2]='='; map_3[1][3]='='; map_3[1][4]='='; map_3[1][5]='=';
-    map_3[3][5]='='; map_3[3][6]='='; map_3[3][7]='='; map_3[3][8]='=';
-    map_3[4][2]='='; map_3[5][2]='='; map_3[6][2]='=';
-    map_3[6][8]='='; map_3[7][8]='='; map_3[8][8]='=';
-    map_3[5][5]='='; map_3[6][5]='=';
+    //look for a random position to place a ship:
+    int a=rand()%8+1;   //[1,8]
+    int b=rand()%5+1;   //must stay b/w [1,5]
+    cout<<a<<" "<<b<<endl;
+    map_3[a][b]='='; map_3[a][b+1]='='; map_3[a][b+2]='='; map_3[a][b+3]='=';
+    
+    //--------------------------------------------------------------------------
+    //------------->   randomly place 2nd ship:
+    do{
+        a=rand()%8+1;   //[1,8]
+        b=rand()%5+1;   //must stay b/w [1,5]
+    }while(map_3[a][b]=='='||map_3[a][b+1]=='='||map_3[a][b+2]=='='||map_3[a][b+3]=='=');
+    cout<<a<<" "<<b<<endl;
+    map_3[a][b]='='; map_3[a][b+1]='='; map_3[a][b+2]='='; map_3[a][b+3]='=';
+    
+    //--------------------------------------------------------------------------
+    //------------->   randomly place 3rd ship:
+    
+    do{
+        a=rand()%6+1;   //must stay b/w [1,6]
+        b=rand()%8+1;   //[1,8]
+    }while(map_3[a][b]=='='||map_3[a+1][b]=='='||map_3[a+2][b]=='='||map_3[a+3][b]=='=');
+        map_3[a][b]='='; map_3[a+1][b]='='; map_3[a+2][b]='=';
+
+    //--------------------------------------------------------------------------
+    //------------->   randomly place 4th ship:
+    
+    do{
+        a=rand()%6+1;   //must stay b/w [1,6]
+        b=rand()%8+1;   //[1,8]
+    }while(map_3[a][b]=='='||map_3[a+1][b]=='='||map_3[a+2][b]=='='||map_3[a+3][b]=='=');
+        map_3[a][b]='='; map_3[a+1][b]='='; map_3[a+2][b]='=';
+
+//--------------------------------------------------------------------------
+    //------------->   randomly place 5th ship:
+    
+    do{
+        a=rand()%7+1;   //must stay b/w [1,6]
+        b=rand()%8+1;   //[1,8]
+    }while(map_3[a][b]=='='||map_3[a+1][b]=='='||map_3[a+2][b]=='=');
+        map_3[a][b]='='; map_3[a+1][b]='=';
+
 }
 //******************************************************************************
 //*********************** place ************************************************
@@ -267,16 +323,18 @@ void check(char map_3[][SIZE],int){
 
 int convert(char c){
 	string error="\nError in conversion\n";
+        int ret;
     switch(c){
-        case 'a': return 1; break;
-        case 'b': return 2; break;
-        case 'c': return 3; break;
-        case 'd': return 4; break;
-        case 'e': return 5; break;
-        case 'f': return 6; break;
-        case 'g': return 7; break;
-        case 'h': return 8; break;
+        case 'a': ret=1; break;
+        case 'b': ret=2; break;
+        case 'c': ret=3; break;
+        case 'd': ret=4; break;
+        case 'e': ret=5; break;
+        case 'f': ret=6; break;
+        case 'g': ret=7; break;
+        case 'h': ret=8; break;
+        default : cout<<error;
     }
-    cout<<error;
-    return 0;
+    return ret;
 }
+
