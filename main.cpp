@@ -23,10 +23,11 @@ void start(char[][SIZE],int,char[][SIZE],int,char[][SIZE],int);//initializes map
 void place(char[][SIZE],int);          //asks user to place the battleships on map
 int convert(char);                  //converts 'char' -> 'int' for use in arrays
 bool mAttack(char[][SIZE],int,char[][SIZE],int);  //Users turn 
-void cAttack(char[][SIZE],int);                //computers turn
+bool cAttack(char[][SIZE],int);                //computers turn
 void check(char[][SIZE],int);                  //checks if all targets are hit
 void disply(char[][SIZE],int);
 void clrscr();
+void intro();
 //---------------------------------------------------------------<<<<<<<<<<<<<<<
 //------Execution Begins Here------------------------------------<<<<<<<<<<<<<<<
 //---------------------------------------------------------------<<<<<<<<<<<<<<<
@@ -39,48 +40,58 @@ int main(int argc, char** argv) {
     char continu='x';
     bool turns;
     
-    cout<<"\n         BATTLESHIP GAME\n"<<"       PLACE YOUR BATTLESHIPS:\n";
+    intro();        //display game title
+    cout<<"                             Hit enter to continue\n";
+    cin.get();
+    cout<<"\n\n\n\n-------------------------------------------------------------"
+            <<"\n                PLACE YOUR BATTLESHIPS:\n"
+            <<"-------------------------------------------------------------\n";
     
-    start(map1,SIZE,map2,SIZE,map3,SIZE);    //initialize and place ships
-    disply(map3,SIZE);
-    place(map1,SIZE);                  //ask user to place ships on map
-    dispMap(map1,SIZE,map2,SIZE);         //display both maps
-    disply(map3,SIZE);
+    start(map1,SIZE,map2,SIZE,map3,SIZE);//initialize and place ships
+    place(map1,SIZE);              //ask user to place ships on map
+    dispMap(map1,SIZE,map2,SIZE);  //display both maps
+    disply(map3,SIZE);             //shows enemy ships(for testing purpose only)
+    
     do{
+        // this loop repeats as long as targets are being hit 
         do{
-            turns=mAttack(map2,SIZE,map3,SIZE);     //start from user attack
-            dispMap(map1,SIZE,map2,SIZE);     //display both maps
+            turns=mAttack(map2,SIZE,map3,SIZE); //start from user attack
+            dispMap(map1,SIZE,map2,SIZE);       //display both maps
         }
-        while(turns==true);
-           
-        //dispMap(map1,SIZE,map2,SIZE);     //display both maps
-        cAttack(map1,SIZE);    //generate random attack from computer & show result
-        dispMap(map1,SIZE,map2,SIZE);     //display both maps
+        while(turns==true);                     //check if target was hit/missed
+        
+        do{
+            turns=true;
+            turns=cAttack(map1,SIZE);    //generate random attack from computer & show result
+            dispMap(map1,SIZE,map2,SIZE);     //display both maps
+        }while(turns==true);
+        
         check(map1,SIZE);              //checks if all targets are hit
-        cout<<"Enter 'y' to continue or any key to end the game: ";
+        
+        cout<<"\nEnter 'x' to end the game \nOr any key and hit enter to continue: ";
         cin>>continu;
-    }while(continu=='y');
+    }while(continu!='x');
     
     return 0;
 }
 //******************************************************************************
-//*********************** disply **********************************************
+//*********************** disply ***********************************************
 //******************************************************************************
 //PURPOSE: display map
 //******************************************************************************
 
 void disply(char a[][SIZE],int){
-    cout<<"\n    a b c d e f g h\n";
-    cout<<"   -----------------\n";
+    cout<<"\n                    a b c d e f g h\n";
+    cout<<"                   -----------------\n";
     for(int i=1;i<=8;i++){
-        cout<<i<<" | ";
+        cout<<"                "<<i<<" | ";
         for(int j=1;j<=8;j++){
             cout<<a[i][j]<<" ";
         }
         cout<<"|";
         cout<<endl;
     }
-    cout<<"   -----------------\n";
+    cout<<"                   -----------------\n";
 }
 
 //******************************************************************************
@@ -88,16 +99,26 @@ void disply(char a[][SIZE],int){
 //******************************************************************************
 //PURPOSE: (computer's attack):  GENERATE A RANDOM ATTACK
 //******************************************************************************
-void cAttack(char mapA[][SIZE],int){
-    int xComp=rand()%8+1,
-        yComp=rand()%8+1;
+bool cAttack(char mapA[][SIZE],int){
     cout<<"Hit enter to continue\n";
-    cin.get();
     cin.ignore();
+    cin.get();
+    
+    int xComp, yComp;
+    bool temp;
+    
+    //test (in this loop) to make sure a different location is chosen 
+        do{
+            xComp=rand()%8+1,       //[1,8]
+            yComp=rand()%8+1;       //[1,8]
+        }while(mapA[xComp][yComp]=='o'||mapA[xComp][yComp]=='X');
+        
 cout<<"\n\n========================================================\n";
     cout<<"==================== COMPUTERS TURN ====================\n";
     cout<<"========================================================\n";
-        cout<<"\nComputers Chose location: ("<<xComp<<",";
+        
+    cout<<"\n  -->  Computers Chose location: ("<<xComp<<",";
+    
     switch(yComp){
         case 1:cout<<"a)";break;
         case 2:cout<<"b)";break;
@@ -111,11 +132,17 @@ cout<<"\n\n========================================================\n";
     if(mapA[xComp][yComp]=='='){
         cout<<"\n--------------TARGET HIT--------------------------\n";
         mapA[xComp][yComp]='X';
-    }else{
-        cout<<"\n--------------TARGET MISSED-----------------------\n";
-        mapA[xComp][yComp]='o';        
+        temp=true;
     }
+    else{
+        cout<<"\n--------------TARGET MISSED-----------------------\n";
+        mapA[xComp][yComp]='o';
+        temp=false;
+    }
+    
+    return temp;
 }
+
 //******************************************************************************
 //*********************** dispMap **********************************************
 //******************************************************************************
@@ -149,8 +176,17 @@ bool mAttack(char mapA[][SIZE],int,char mapB[][SIZE],int){
     cout<<"\n\n========================================================\n";
     cout<<"====================YOUR TURN===========================\n";
     cout<<"========================================================\n";
-    cout<<"Enter your attack location: ";
-    cin>>x>>y;
+    
+    do{
+        cout<<"Enter attack location: ";
+        cin>>x;
+    }while(x>9||x<1);
+    
+    do{
+        cin>>y;
+    }while(!(y=='a'||y=='b'||y=='c'||y=='d'||y=='e'||y=='f'||y=='g'||y=='h'));
+    
+    
     if(mapB[x][convert(y)]=='='){
         cout<<"\n--------------TARGET HIT--------------------------\n";
         mapA[x][convert(y)]='X';
@@ -179,7 +215,6 @@ void start(char map_1[][SIZE],int,char map_2[][SIZE],int,char map_3[][SIZE],int)
     //look for a random position to place a ship:
     int a=rand()%8+1;   //[1,8]
     int b=rand()%5+1;   //must stay b/w [1,5]
-    cout<<a<<" "<<b<<endl;
     map_3[a][b]='='; map_3[a][b+1]='='; map_3[a][b+2]='='; map_3[a][b+3]='=';
     
     //--------------------------------------------------------------------------
@@ -188,7 +223,6 @@ void start(char map_1[][SIZE],int,char map_2[][SIZE],int,char map_3[][SIZE],int)
         a=rand()%8+1;   //[1,8]
         b=rand()%5+1;   //must stay b/w [1,5]
     }while(map_3[a][b]=='='||map_3[a][b+1]=='='||map_3[a][b+2]=='='||map_3[a][b+3]=='=');
-    cout<<a<<" "<<b<<endl;
     map_3[a][b]='='; map_3[a][b+1]='='; map_3[a][b+2]='='; map_3[a][b+3]='=';
     
     //--------------------------------------------------------------------------
@@ -228,17 +262,19 @@ void start(char map_1[][SIZE],int,char map_2[][SIZE],int,char map_3[][SIZE],int)
 void place(char map1[][SIZE],int){
     int x=0; char y='z';
     //-----------------1st ship------------------------------------------------- 
-    //dispMap(map1,SIZE,map1,SIZE);
     disply(map1,SIZE);
     cout<<"\nWhere do you want to place a horizontal battleship(4 units long)? \n";
+    
     do{
         cout<<"Enter the digit value between[1-8]: ";
         cin>>x;
-    }while(x>9||x<1);
+    }while(x>8||x<1);
+    
     do{
         cout<<"enter the alphabet value between [a-e]: ";
         cin>>y;
     }while(!(y=='a'||y=='b'||y=='c'||y=='d'||y=='e'));
+    
     map1[x][convert(y)]='=';
     map1[x][convert(y)+1]='=';
     map1[x][convert(y)+2]='=';
@@ -317,7 +353,8 @@ void place(char map1[][SIZE],int){
 //******************************************************************************
 
 void check(char map_3[][SIZE],int){
-    if(map_3[1][2]!='='&& map_3[1][3]!='='&& map_3[1][4]!='='&& map_3[1][5]!='='&&
+    /*
+     * if(map_3[1][2]!='='&& map_3[1][3]!='='&& map_3[1][4]!='='&& map_3[1][5]!='='&&
        map_3[3][5]!='='&& map_3[3][6]!='='&& map_3[3][7]!='='&& map_3[3][8]!='='&&
        map_3[4][2]!='='&& map_3[5][2]!='='&& map_3[6][2]!='='&&
        map_3[6][8]!='='&& map_3[7][8]!='='&& map_3[8][8]!='='&&
@@ -327,6 +364,7 @@ void check(char map_3[][SIZE],int){
                 <<"=======================================================\n";
 
     }
+     */
 }
 
 //******************************************************************************
@@ -361,3 +399,13 @@ int convert(char c){
 void clrscr(){
     cout<<"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
 }
+
+
+ void intro(){
+     cout<<endl<<endl<<
+",-----.    ,---. ,--------.,--------.,--.   ,------. ,---.  ,--.  ,--.,--.,------. \n"<<  
+"|  |) /_  /  O  \'---.  .--''--.  .--'|  |   |  .---''   .-' |  '--'  ||  ||  .--. ' \n"<< 
+"|  .-.  ||  .-.  |  |  |      |  |   |  |   |  `--, `.  `-. |  .--.  ||  ||  '--' | \n"<<
+"|  '--' /|  | |  |  |  |      |  |   |  '--.|  `---..-'    ||  |  |  ||  ||  | --' \n"<<  
+"`------' `--' `--'  `--'      `--'   `-----'`------'`-----' `--'  `--'`--'`--'"<<endl;
+ }
