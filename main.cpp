@@ -23,7 +23,7 @@ void start(char[][SIZE],int,char[][SIZE],int,char[][SIZE],int);//initializes map
 void place(char[][SIZE],int);          //asks user to place the battleships on map
 int convert(char);                  //converts 'char' -> 'int' for use in arrays
 bool mAttack(char[][SIZE],int,char[][SIZE],int);  //Users turn 
-bool cAttack(char[][SIZE],int);                //computers turn
+void cAttack(char[][SIZE],int,bool &,bool &,bool &,bool &,short &,short &);//computers turn
 void check(char[][SIZE],int);                  //checks if all targets are hit
 void disply(char[][SIZE],int);
 void clrscr();
@@ -39,6 +39,11 @@ int main(int argc, char** argv) {
     char map3[SIZE][SIZE];            //2d array that will show computer's data
     char continu='x';
     bool turns;
+    
+    //these help computer determine where to attack next; once a target is found
+    bool up=false,down=false,left=false,right=true; 
+    
+    short tFoundX, tFoundY;
     
     intro();        //display game title
     cout<<"                             Hit enter to continue\n";
@@ -60,12 +65,9 @@ int main(int argc, char** argv) {
         }
         while(turns==true);                     //check if target was hit/missed
         
-        do{
-            turns=true;
-            turns=cAttack(map1,SIZE);    //generate random attack from computer & show result
-            dispMap(map1,SIZE,map2,SIZE);     //display both maps
-        }while(turns==true);
-        
+        cAttack(map1,SIZE,up,down,left,right,tFoundX, tFoundY);    //generate random attack from computer & show result
+        dispMap(map1,SIZE,map2,SIZE);     //display both maps
+
         check(map1,SIZE);              //checks if all targets are hit
         
         cout<<"\nEnter 'x' to end the game \nOr any key and hit enter to continue: ";
@@ -98,49 +100,87 @@ void disply(char a[][SIZE],int){
 //*********************** cAttcak **********************************************
 //******************************************************************************
 //PURPOSE: (computer's attack):  GENERATE A RANDOM ATTACK
+//arguments: an array, 4-bool values and 2-short 
 //******************************************************************************
-bool cAttack(char mapA[][SIZE],int){
-    cout<<"Hit enter to continue\n";
-    cin.ignore();
-    cin.get();
-    
-    int xComp, yComp;
-    bool temp;
-    
-    //test (in this loop) to make sure a different location is chosen 
+void cAttack(char mapA[][SIZE],int, bool &u,bool &d,bool &l,bool &r,short &x,short &y){
+        bool temp;
+        int xComp, yComp;
+        short rCount=1, lCount=1;
+
         do{
-            xComp=rand()%8+1,       //[1,8]
-            yComp=rand()%8+1;       //[1,8]
-        }while(mapA[xComp][yComp]=='o'||mapA[xComp][yComp]=='X');
+        cout<<"Hit enter to continue\n";
+        cin.ignore();
+        cin.get();
         
-cout<<"\n\n========================================================\n";
-    cout<<"==================== COMPUTERS TURN ====================\n";
-    cout<<"========================================================\n";
-        
-    cout<<"\n  -->  Computers Chose location: ("<<xComp<<",";
-    
-    switch(yComp){
-        case 1:cout<<"a)";break;
-        case 2:cout<<"b)";break;
-        case 3:cout<<"c)";break;
-        case 4:cout<<"d)";break;
-        case 5:cout<<"e)";break;
-        case 6:cout<<"f)";break;
-        case 7:cout<<"g)";break;
-        case 8:cout<<"h)";
-    }
-    if(mapA[xComp][yComp]=='='){
-        cout<<"\n--------------TARGET HIT--------------------------\n";
-        mapA[xComp][yComp]='X';
-        temp=true;
-    }
-    else{
-        cout<<"\n--------------TARGET MISSED-----------------------\n";
-        mapA[xComp][yComp]='o';
-        temp=false;
-    }
-    
-    return temp;
+        if(temp==false&&tryAgn==false){
+        //test (in this loop) to make sure a different location is chosen 
+            do{
+                xComp=rand()%8+1,       //[1,8]
+                yComp=rand()%8+1;       //[1,8]
+            }while(mapA[xComp][yComp]=='o'||mapA[xComp][yComp]=='X');
+        }
+        else{
+            if(r==true && tryAgn==true){
+                yComp=yComp+rCount;  //attack one position to right
+                rCount++;
+            }
+            else if(l==true){
+                yComp=y-lCount;
+                lCount++;
+            }
+        }
+    cout<<"\n\n========================================================\n";
+        cout<<"==================== COMPUTERS TURN ====================\n";
+        cout<<"========================================================\n";
+
+        cout<<"\n  -->  Computers Chose location: ("<<xComp<<",";
+
+        switch(yComp){                  //convert number val -> alphabet[a,h]
+            case 1:cout<<"a)";break;
+            case 2:cout<<"b)";break;
+            case 3:cout<<"c)";break;
+            case 4:cout<<"d)";break;
+            case 5:cout<<"e)";break;
+            case 6:cout<<"f)";break;
+            case 7:cout<<"g)";break;
+            case 8:cout<<"h)";
+        }
+        //check if target is hit:
+        if(mapA[xComp][yComp]=='='){
+            cout<<"\n--------------TARGET HIT--------------------------\n";
+            disply(mapA,SIZE);
+            mapA[xComp][yComp]='X';
+            temp=true;
+            if(x==0){
+                x=xComp;
+                y=yComp;
+            }
+        }
+        else{
+            cout<<"\n--------------TARGET MISSED-----------------------\n";
+            mapA[xComp][yComp]='o';
+            temp=false;
+            
+            //these conditions make sure the direction is voided if target is missed
+            if(r==true){
+                r=false;
+                l=true;
+            }
+            if(l==true){
+                l=false;
+                u=true;
+            }
+            if(u==true){
+                u=false;
+                d=true;
+            }
+            if(d==true){
+                d=false;
+                r=true;
+            }
+        }
+    }while(temp==true);
+   
 }
 
 //******************************************************************************
