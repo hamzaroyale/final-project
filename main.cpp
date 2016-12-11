@@ -10,6 +10,7 @@
 #include <iomanip>      //formats text
 #include <cstdlib>      //Random number seed
 #include <ctime>        //Seed the random number generator
+#include <fstream>
 
 using namespace std;    //Name-space used in the System Library
 
@@ -22,28 +23,45 @@ void dispMap(char[][SIZE],int,char[][SIZE],int);              //displays maps
 void start(char[][SIZE],int,char[][SIZE],int,char[][SIZE],int);//initializes maps 
 void place(char[][SIZE],int);          //asks user to place the battleships on map
 int convert(char);                  //converts 'char' -> 'int' for use in arrays
-bool mAttack(char[][SIZE],int,char[][SIZE],int);  //Users turn 
+bool mAttack(char[][SIZE],int,char[][SIZE],int,int&);  //Users turn 
 void cAttack(char[][SIZE],int,bool &,bool &,bool &,bool &,int &,int &,bool&);//computers turn
-void check(char[][SIZE],int);                  //checks if all targets are hit
+int check(char[][SIZE],int,char[][SIZE],int);                  //checks if all targets are hit
 void disply(char[][SIZE],int);
 void clrscr();
 void intro();
+void highscr(int[]);
 //---------------------------------------------------------------<<<<<<<<<<<<<<<
 //------Execution Begins Here------------------------------------<<<<<<<<<<<<<<<
 //---------------------------------------------------------------<<<<<<<<<<<<<<<
 int main(int argc, char** argv) {
     srand(static_cast<unsigned int>(time(0)));
     
-    char map1[SIZE][SIZE];            //2d array that will store user data
+    char map1[SIZE][SIZE];            //2d array that will store player's data
     char map2[SIZE][SIZE];            //2d array that will store computers actual data
     char map3[SIZE][SIZE];            //2d array that will show computer's data
     char continu='x';
     bool turns,tryAgn=false;
+    int num_scr=100;
+    int mScore=0;                       //players score
+    int count=0;
+    ofstream oFile;
+    ofstream iFile;
+    int scores[num_scr];
     
     //these help computer determine where to attack next; once a target is found
     bool up=false,down=false,left=false,right=true; 
     
     int tFoundX=0, tFoundY=0;
+    
+    oFile.open("file.txt", fstream::app);
+    iFile.open("file.txt");
+
+    while(iFile.eof()){
+        iFile>>scores[count];
+        count++;
+    }
+    
+    highscr(scores);
     
     intro();        //display game title
     cout<<"                             Hit enter to continue\n";
@@ -56,11 +74,11 @@ int main(int argc, char** argv) {
     place(map1,SIZE);              //ask user to place ships on map
     dispMap(map1,SIZE,map2,SIZE);  //display both maps
     disply(map3,SIZE);             //shows enemy ships(for testing purpose only)
-    
+    oFile.open("file.dat");
     do{
         // this loop repeats as long as targets are being hit 
         do{
-            turns=mAttack(map2,SIZE,map3,SIZE); //start from user attack
+            turns=mAttack(map2,SIZE,map3,SIZE,mScore); //start from user attack
             dispMap(map1,SIZE,map2,SIZE);       //display both maps
         }
         while(turns==true);                     //check if target was hit/missed
@@ -68,12 +86,17 @@ int main(int argc, char** argv) {
         cAttack(map1,SIZE,up,down,left,right,tFoundX, tFoundY,tryAgn);    //generate random attack from computer & show result
         dispMap(map1,SIZE,map2,SIZE);     //display both maps
 
-        check(map1,SIZE);              //checks if all targets are hit
+        check(map1,SIZE,map3,SIZE);              //checks if all targets are hit
         
         cout<<"\nEnter 'x' to end the game \nOr any key and hit enter to continue: ";
         cin>>continu;
     }while(continu!='x');
     
+    oFile<<mScore<<endl;
+    
+    oFile.close();
+    iFile.close();
+
     return 0;
 }
 //******************************************************************************
@@ -141,8 +164,6 @@ void cAttack(char mapA[][SIZE],int, bool &u,bool &d,bool &l,bool &r,int &x,int &
                     yComp=y;
                     xComp=x+dCount;
                     dCount++;
-                    //this makes sure that in the next hit, the orignal location is saved
-                    x=0;            
                 }
         }
         cout<<endl<<"yComp= "<<yComp<<endl;
@@ -204,6 +225,8 @@ void cAttack(char mapA[][SIZE],int, bool &u,bool &d,bool &l,bool &r,int &x,int &
                 d=false;
                 r=true;
                 tryAgn=false;
+                //this makes sure that in the next hit, the orignal location is saved
+                x=0;
             }
         }
     }while(temp==true);
@@ -238,7 +261,7 @@ void dispMap(char a[][SIZE],int rowSizea, char b[][SIZE],int rowsizeb){
 //PURPOSE: ASKS THE USER FOR ATTACK LOCATION
 //******************************************************************************
 
-bool mAttack(char mapA[][SIZE],int,char mapB[][SIZE],int){
+bool mAttack(char mapA[][SIZE],int,char mapB[][SIZE],int,int&scr){
     int x; char y; bool check;
     cout<<"\n\n========================================================\n";
     cout<<"====================YOUR TURN===========================\n";
@@ -258,6 +281,7 @@ bool mAttack(char mapA[][SIZE],int,char mapB[][SIZE],int){
         cout<<"\n--------------TARGET HIT--------------------------\n";
         mapA[x][convert(y)]='X';
         check=true;
+        scr+=10;
     }else{
         cout<<"\n--------------TARGET MISSED-----------------------\n";
         mapA[x][convert(y)]='o';
@@ -419,19 +443,34 @@ void place(char map1[][SIZE],int){
 //PURPOSE: checks if all targets are hit
 //******************************************************************************
 
-void check(char map_3[][SIZE],int){
-    /*
-     * if(map_3[1][2]!='='&& map_3[1][3]!='='&& map_3[1][4]!='='&& map_3[1][5]!='='&&
-       map_3[3][5]!='='&& map_3[3][6]!='='&& map_3[3][7]!='='&& map_3[3][8]!='='&&
-       map_3[4][2]!='='&& map_3[5][2]!='='&& map_3[6][2]!='='&&
-       map_3[6][8]!='='&& map_3[7][8]!='='&& map_3[8][8]!='='&&
-       map_3[5][5]!='='&& map_3[6][5]!='='){
+int check(char map_1[][SIZE],int,char map_3[][SIZE],int){
+    bool all_1=true,all_3=true;
+    int temp=0;
+    for(int i=1;i<9;i++){
+        for(int j=1;j<9;j++){
+            if(map_1[i][j]=='='){
+                all_1=false;
+            }
+            if(map_3[i][j]=='='){
+                all_3=false;
+            }
+        }
+    }
+    if(all_1==true){
+        temp=1;
+        cout<<"\n------------------COMPUTER WON-------------------------\n";
         cout<<"\n\n=======================================================\n"
                 <<"===========ALL TARGETS HAVE BEEN HIT===================\n"
                 <<"=======================================================\n";
-
     }
-     */
+    else if(all_3==true){
+        temp=3;
+        cout<<"\n---------------------YOU WON-------------------------\n";
+        cout<<"\n\n=======================================================\n"
+                <<"===========ALL TARGETS HAVE BEEN HIT===================\n"
+                <<"=======================================================\n";
+    }
+    return temp;
 }
 
 //******************************************************************************
@@ -468,7 +507,7 @@ void clrscr(){
 }
 
 
- void intro(){
+void intro(){
      cout<<endl<<endl<<
 ",-----.    ,---. ,--------.,--------.,--.   ,------. ,---.  ,--.  ,--.,--.,------. \n"<<  
 "|  |) /_  /  O  \'---.  .--''--.  .--'|  |   |  .---''   .-' |  '--'  ||  ||  .--. ' \n"<< 
@@ -476,3 +515,7 @@ void clrscr(){
 "|  '--' /|  | |  |  |  |      |  |   |  '--.|  `---..-'    ||  |  |  ||  ||  | --' \n"<<  
 "`------' `--' `--'  `--'      `--'   `-----'`------'`-----' `--'  `--'`--'`--'"<<endl;
  }
+ 
+void highscr(int a[]){
+    for()
+}
