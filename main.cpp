@@ -23,7 +23,7 @@ void start(char[][SIZE],int,char[][SIZE],int,char[][SIZE],int);//initializes map
 void place(char[][SIZE],int);          //asks user to place the battleships on map
 int convert(char);                  //converts 'char' -> 'int' for use in arrays
 bool mAttack(char[][SIZE],int,char[][SIZE],int);  //Users turn 
-void cAttack(char[][SIZE],int,bool &,bool &,bool &,bool &,short &,short &);//computers turn
+void cAttack(char[][SIZE],int,bool &,bool &,bool &,bool &,int &,int &,bool&);//computers turn
 void check(char[][SIZE],int);                  //checks if all targets are hit
 void disply(char[][SIZE],int);
 void clrscr();
@@ -38,12 +38,12 @@ int main(int argc, char** argv) {
     char map2[SIZE][SIZE];            //2d array that will store computers actual data
     char map3[SIZE][SIZE];            //2d array that will show computer's data
     char continu='x';
-    bool turns;
+    bool turns,tryAgn=false;
     
     //these help computer determine where to attack next; once a target is found
     bool up=false,down=false,left=false,right=true; 
     
-    short tFoundX, tFoundY;
+    int tFoundX=0, tFoundY=0;
     
     intro();        //display game title
     cout<<"                             Hit enter to continue\n";
@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
         }
         while(turns==true);                     //check if target was hit/missed
         
-        cAttack(map1,SIZE,up,down,left,right,tFoundX, tFoundY);    //generate random attack from computer & show result
+        cAttack(map1,SIZE,up,down,left,right,tFoundX, tFoundY,tryAgn);    //generate random attack from computer & show result
         dispMap(map1,SIZE,map2,SIZE);     //display both maps
 
         check(map1,SIZE);              //checks if all targets are hit
@@ -100,39 +100,62 @@ void disply(char a[][SIZE],int){
 //*********************** cAttcak **********************************************
 //******************************************************************************
 //PURPOSE: (computer's attack):  GENERATE A RANDOM ATTACK
-//arguments: an array, 4-bool values and 2-short 
+//arguments: an array, 4-bool values and 2-int 
 //******************************************************************************
-void cAttack(char mapA[][SIZE],int, bool &u,bool &d,bool &l,bool &r,short &x,short &y){
+void cAttack(char mapA[][SIZE],int, bool &u,bool &d,bool &l,bool &r,int &x,int &y,bool & tryAgn){
         bool temp;
         int xComp, yComp;
-        short rCount=1, lCount=1;
+        int rCount=1, lCount=1, uCount=1, dCount=1;
 
         do{
         cout<<"Hit enter to continue\n";
         cin.ignore();
         cin.get();
         
-        if(temp==false&&tryAgn==false){
+        if(temp==false && tryAgn==false){
         //test (in this loop) to make sure a different location is chosen 
             do{
+                cout<<"making a random attack";
                 xComp=rand()%8+1,       //[1,8]
                 yComp=rand()%8+1;       //[1,8]
             }while(mapA[xComp][yComp]=='o'||mapA[xComp][yComp]=='X');
         }
         else{
-            if(r==true && tryAgn==true){
-                yComp=yComp+rCount;  //attack one position to right
-                rCount++;
-            }
-            else if(l==true){
-                yComp=y-lCount;
-                lCount++;
-            }
+            //if(temp==true || tryAgn==true){
+                cout<<"guessing an attack location";                
+                if(r==true){
+                    yComp=y+rCount;  //attack one position to right
+                    rCount++;
+                }
+                else if(l==true){
+                    yComp=y-lCount;
+                    xComp=x;
+                    lCount++;
+                }
+                else if(u==true){
+                    yComp=y;
+                    xComp=x-uCount;
+                    uCount++;
+                }
+                else if(d==true){
+                    yComp=y;
+                    xComp=x+dCount;
+                    dCount++;
+                    //this makes sure that in the next hit, the orignal location is saved
+                    x=0;            
+                }
         }
-    cout<<"\n\n========================================================\n";
+        cout<<endl<<"yComp= "<<yComp<<endl;
+        cout<<endl<<"xComp= "<<xComp<<endl;
+        cout<<endl<<"temp= "<<temp<<endl;
+        cout<<endl<<"l= "<<l<<endl;
+        cout<<endl<<"try= "<<tryAgn<<endl;
+        
+        cout<<"\n\n========================================================\n";
         cout<<"==================== COMPUTERS TURN ====================\n";
         cout<<"========================================================\n";
 
+        
         cout<<"\n  -->  Computers Chose location: ("<<xComp<<",";
 
         switch(yComp){                  //convert number val -> alphabet[a,h]
@@ -145,12 +168,15 @@ void cAttack(char mapA[][SIZE],int, bool &u,bool &d,bool &l,bool &r,short &x,sho
             case 7:cout<<"g)";break;
             case 8:cout<<"h)";
         }
+        
+        
         //check if target is hit:
         if(mapA[xComp][yComp]=='='){
             cout<<"\n--------------TARGET HIT--------------------------\n";
-            disply(mapA,SIZE);
             mapA[xComp][yComp]='X';
+            disply(mapA,SIZE);
             temp=true;
+            tryAgn=true;
             if(x==0){
                 x=xComp;
                 y=yComp;
@@ -162,21 +188,22 @@ void cAttack(char mapA[][SIZE],int, bool &u,bool &d,bool &l,bool &r,short &x,sho
             temp=false;
             
             //these conditions make sure the direction is voided if target is missed
-            if(r==true){
+            if(r==true && tryAgn==true){
                 r=false;
                 l=true;
             }
-            if(l==true){
+            else if(l==true && tryAgn==true){
                 l=false;
                 u=true;
             }
-            if(u==true){
+            else if(u==true && tryAgn==true){
                 u=false;
                 d=true;
             }
-            if(d==true){
+            else if(d==true && tryAgn==true){
                 d=false;
                 r=true;
+                tryAgn=false;
             }
         }
     }while(temp==true);
