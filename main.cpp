@@ -29,7 +29,7 @@ int check(char[][SIZE],int,char[][SIZE],int);                  //checks if all t
 void disply(char[][SIZE],int);
 void clrscr();
 void intro();
-void highscr(int[]);
+void highscr(int*);
 //---------------------------------------------------------------<<<<<<<<<<<<<<<
 //------Execution Begins Here------------------------------------<<<<<<<<<<<<<<<
 //---------------------------------------------------------------<<<<<<<<<<<<<<<
@@ -41,28 +41,26 @@ int main(int argc, char** argv) {
     char map3[SIZE][SIZE];            //2d array that will show computer's data
     char continu='x';
     bool turns,tryAgn=false;
-    int num_scr=100;
+    int num_scr=10;
     int mScore=0;                       //players score
     int count=0;
-    ofstream oFile;
-    ofstream iFile;
+    fstream iFile;
     int scores[num_scr];
-    
+    int temp;
     //these help computer determine where to attack next; once a target is found
     bool up=false,down=false,left=false,right=true; 
     
     int tFoundX=0, tFoundY=0;
     
-    oFile.open("file.txt", fstream::app);
     iFile.open("file.txt");
 
-    while(iFile.eof()){
-        iFile>>scores[count];
+    while(! iFile.eof()){
+        iFile>>temp;
+        //cout<<"count: "<<count<<" "<<temp<<endl;
+        temp=scores[count];
         count++;
     }
-    
     highscr(scores);
-    
     intro();        //display game title
     cout<<"                             Hit enter to continue\n";
     cin.get();
@@ -74,7 +72,6 @@ int main(int argc, char** argv) {
     place(map1,SIZE);              //ask user to place ships on map
     dispMap(map1,SIZE,map2,SIZE);  //display both maps
     disply(map3,SIZE);             //shows enemy ships(for testing purpose only)
-    oFile.open("file.dat");
     do{
         // this loop repeats as long as targets are being hit 
         do{
@@ -92,9 +89,9 @@ int main(int argc, char** argv) {
         cin>>continu;
     }while(continu!='x');
     
-    oFile<<mScore<<endl;
+    //oFile<<mScore<<endl;
     
-    oFile.close();
+    //oFile.close();
     iFile.close();
 
     return 0;
@@ -515,7 +512,19 @@ void intro(){
 "|  '--' /|  | |  |  |  |      |  |   |  '--.|  `---..-'    ||  |  |  ||  ||  | --' \n"<<  
 "`------' `--' `--'  `--'      `--'   `-----'`------'`-----' `--'  `--'`--'`--'"<<endl;
  }
- 
-void highscr(int a[]){
-    for()
+
+void highscr(int *a){
+    for(int i=0;i<10-1;i++){
+        for(int j=i+1;j<10;j++){
+            if(*(a+i)>*(a+j)){
+                *(a+i)=*(a+i)^*(a+j);
+                *(a+j)=*(a+i)^*(a+j);
+                *(a+i)=*(a+i)^*(a+j);
+            }
+        }
+    }
+    //-------------------------------
+    for(int i=0;i<10;i++){
+        //cout<<*(a+i)<<endl;
+    }
 }
