@@ -29,7 +29,7 @@ int check(char[][SIZE],int,char[][SIZE],int);                  //checks if all t
 void disply(char[][SIZE],int);
 void clrscr();
 void intro();
-void highscr(int*);
+void highscr(int*,int);
 //---------------------------------------------------------------<<<<<<<<<<<<<<<
 //------Execution Begins Here------------------------------------<<<<<<<<<<<<<<<
 //---------------------------------------------------------------<<<<<<<<<<<<<<<
@@ -57,10 +57,10 @@ int main(int argc, char** argv) {
     while(! iFile.eof()){
         iFile>>temp;
         //cout<<"count: "<<count<<" "<<temp<<endl;
-        temp=scores[count];
+        scores[count]=temp;
         count++;
     }
-    highscr(scores);
+    highscr(scores,SIZE);
     intro();        //display game title
     cout<<"                             Hit enter to continue\n";
     cin.get();
@@ -88,9 +88,8 @@ int main(int argc, char** argv) {
         cout<<"\nEnter 'x' to end the game \nOr any key and hit enter to continue: ";
         cin>>continu;
     }while(continu!='x');
-    
+//    cout<<endl<<mscore<<endl;
     //oFile<<mScore<<endl;
-    
     //oFile.close();
     iFile.close();
 
@@ -505,7 +504,7 @@ void clrscr(){
 
 
 void intro(){
-     cout<<endl<<endl<<
+     cout<<endl<<
 ",-----.    ,---. ,--------.,--------.,--.   ,------. ,---.  ,--.  ,--.,--.,------. \n"<<  
 "|  |) /_  /  O  \'---.  .--''--.  .--'|  |   |  .---''   .-' |  '--'  ||  ||  .--. ' \n"<< 
 "|  .-.  ||  .-.  |  |  |      |  |   |  |   |  `--, `.  `-. |  .--.  ||  ||  '--' | \n"<<
@@ -513,18 +512,19 @@ void intro(){
 "`------' `--' `--'  `--'      `--'   `-----'`------'`-----' `--'  `--'`--'`--'"<<endl;
  }
 
-void highscr(int *a){
-    for(int i=0;i<10-1;i++){
-        for(int j=i+1;j<10;j++){
-            if(*(a+i)>*(a+j)){
-                *(a+i)=*(a+i)^*(a+j);
-                *(a+j)=*(a+i)^*(a+j);
-                *(a+i)=*(a+i)^*(a+j);
+void highscr(int *a,int size){
+    for(int i=0;i<SIZE-1;i++){
+        for(int j=i+1;j<SIZE;j++){
+            if(*(a+j)>*(a+i)){
+                *(a+j)=*(a+j)^*(a+i);
+                *(a+i)=*(a+j)^*(a+i);
+                *(a+j)=*(a+j)^*(a+i);
             }
         }
     }
     //-------------------------------
-    for(int i=0;i<10;i++){
-        //cout<<*(a+i)<<endl;
+    cout<<"HIGHSCORE:\n";
+    for(int i=0;i<SIZE;i++){
+        cout<<setw(2)<<i+1<<"."<<setw(4)<<*(a+i)<<endl;
     }
 }
